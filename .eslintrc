@@ -5,6 +5,7 @@
     "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
     "arrow-parens": ["error", "as-needed"],
     "no-param-reassign": ["error", { "props": false }],
+    "no-plusplus": 0,
     "no-console": 0,
     "default-case": 0
   },
