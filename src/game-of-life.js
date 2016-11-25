@@ -32,11 +32,9 @@ export default class GameOfLife {
       back: this.createTexture()
     };
 
-    const bufferData = [1, -1, 1, -1, -1, 1, 1, 1];
+    const bufferData = [-1, -1, 1, -1, -1, 1, 1, 1];
     this.buffer = createBuffer(gl, bufferData);
     this.framebuffer = createFramebuffer(gl, this.stateSize);
-    // this.programs.copy.attributes.quad.location = 0;
-    // this.programs.update.attributes.quad.location = 0;
 
     this.randomizeBoard();
   }
