@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "gl-buffer": "^2.1.2",
+    "gl-matrix": "^2.3.2",
     "gl-shader": "^4.2.1"
   }
 }
