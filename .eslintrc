@@ -2,6 +2,12 @@
   "extends": "airbnb-base",
   "rules": {
     "comma-dangle": ["error", "never"],
-    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }]
+    "import/no-extraneous-dependencies": ["error", { "devDependencies": true }],
+    "no-param-reassign": ["error", { "props": false }],
+    "no-console": 0,
+    "default-case": 0
+  },
+  "env": {
+    "browser": true
   }
 }

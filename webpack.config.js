@@ -21,11 +21,17 @@ module.exports = () => ({
     publicPath: '/'
   },
   module: {
-    loaders: [{
-      test: /\.js$/,
-      loaders: ['babel-loader'],
-      exclude: /node_modules/
-    }]
+    loaders: [
+      {
+        test: /\.js$/,
+        loaders: ['babel-loader'],
+        exclude: /node_modules/
+      },
+      {
+        test: /\.glsl$/,
+        loaders: ['raw-loader']
+      }
+    ]
   },
   plugins: [
     new webpack.HotModuleReplacementPlugin(),
