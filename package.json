@@ -30,6 +30,7 @@
     "gl-matrix": "^2.3.2",
     "gl-shader": "^4.2.1",
     "gl-texture2d": "^2.1.0",
-    "ndarray": "^1.0.18"
+    "ndarray": "^1.0.18",
+    "twgl.js": "^2.1.0"
   }
 }
