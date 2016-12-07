@@ -1,11 +1,4 @@
-/*
-import GameOfLife from './game-of-life';
+import World from './world';
 
-const game = new GameOfLife();
-game.render();
-*/
-
-import Playground from './playground';
-
-const playground = new Playground();
-playground.render();
+const world = new World();
+world.animate();

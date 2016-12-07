@@ -7,7 +7,9 @@
     "no-param-reassign": ["error", { "props": false }],
     "no-plusplus": 0,
     "no-console": 0,
-    "default-case": 0
+    "default-case": 0,
+    "no-bitwise": 0,
+    "no-continue": 0
   },
   "env": {
     "browser": true
