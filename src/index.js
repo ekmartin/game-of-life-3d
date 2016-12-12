@@ -1,4 +1,4 @@
-import World from './world';
+import GameOfLife from './3d-gol';
 
-const world = new World();
-world.animate();
+const game = new GameOfLife();
+game.animate();
