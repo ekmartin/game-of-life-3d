@@ -5,7 +5,7 @@ import updateVertex from './three-shaders/update.vs.glsl';
 import drawFragment from './three-shaders/draw.fs.glsl';
 import drawVertex from './three-shaders/draw.vs.glsl';
 
-const TICK = 700;
+const TICK = 900;
 
 export default class GameOfLife {
   constructor() {
@@ -16,7 +16,7 @@ export default class GameOfLife {
     const fov = 60;
     const aspect = window.innerWidth / window.innerHeight;
     const near = 1;
-    const far = 10000;
+    const far = 5000;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
     this.camera.position.x = -300;
     this.camera.position.y = 500;
@@ -24,9 +24,11 @@ export default class GameOfLife {
 
     const OrbitControls = orbitSetup(THREE);
     this.controls = new OrbitControls(this.camera);
+    this.controls.minDistance = 400;
+    this.controls.maxDistance = 4000;
 
-    const gameSize = 10;
-    const boxSize = 50;
+    const gameSize = 15;
+    const boxSize = 40;
     const gridSize = gameSize * boxSize;
     this.height = gameSize;
     this.width = gameSize * gameSize;
@@ -66,44 +68,32 @@ export default class GameOfLife {
       }
     });
 
-    const gridHelper = new THREE.GridHelper(gridSize, gameSize);
-    this.scene.add(gridHelper);
     const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
-    // Add some padding between each cube:
-    const padding = 0;
-    const spotSize = padding + boxSize;
-    const totalSize = spotSize * gameSize;
     // Offset is used to center the whole block:
-    const offset = (totalSize - boxSize) / 2;
+    const offset = (gridSize - boxSize) / 2;
     this.cubes = [];
     for (let x = 0; x < gameSize; x++) {
       for (let y = 0; y < gameSize; y++) {
         for (let z = 0; z < gameSize; z++) {
           const drawMaterial = this.createMaterial(x, y, z);
           const cube = new THREE.Mesh(geometry, drawMaterial);
-          cube.position.x = (x * spotSize) - offset;
-          cube.position.y = (y * spotSize) - offset;
-          cube.position.z = (z * spotSize) - offset;
+          cube.position.x = (x * boxSize) - offset;
+          cube.position.y = (y * boxSize) - offset;
+          cube.position.z = (z * boxSize) - offset;
           this.scene.add(cube);
           this.cubes.push(cube);
         }
       }
     }
 
+    // Create the quad we'll render the texture to off-screen:
     const quad = new THREE.PlaneBufferGeometry(this.width, this.height);
     const gameMesh = new THREE.Mesh(quad, this.gameMaterial);
     this.offScene.add(gameMesh);
 
-    this.renderer = new THREE.WebGLRenderer();
+    this.renderer = new THREE.WebGLRenderer({ antialias: true });
     this.renderer.setSize(window.innerWidth, window.innerHeight);
     document.body.appendChild(this.renderer.domElement);
-
-    this.drawMaterial = new THREE.MeshBasicMaterial({ map: this.textures.front.texture });
-    const test = new THREE.Mesh(quad, this.drawMaterial);
-    test.position.x = -450;
-    test.position.y = 150;
-    test.position.z = 300;
-    this.scene.add(test);
 
     this.randomizeBoard();
     this.camera.lookAt(this.scene.position);
@@ -117,6 +107,10 @@ export default class GameOfLife {
     });
   }
 
+  /**
+   * Instantiates a ShaderMaterial with the correct uniforms,
+   * based on the given cube position.
+   */
   createMaterial(x, y, z) {
     const color = new THREE.Vector3(x / this.height, y / this.height, z / this.height);
     const uniforms = {
@@ -176,6 +170,7 @@ export default class GameOfLife {
       this.height,
       THREE.RGBAFormat
     );
+
     this.textures.front.texture.needsUpdate = true;
   }
 
@@ -214,7 +209,6 @@ export default class GameOfLife {
     this.cubes.forEach(({ material }) => {
       material.uniforms.state.value = this.textures.front.texture;
     });
-    this.drawMaterial.map = this.textures.front.texture;
 
     // Then swap them so we can do the opposite
     // the next time (so our simulation moves forward):
