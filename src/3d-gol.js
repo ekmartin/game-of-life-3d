@@ -70,7 +70,7 @@ export default class GameOfLife {
     this.scene.add(gridHelper);
     const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     // Add some padding between each cube:
-    const padding = 20;
+    const padding = 0;
     const spotSize = padding + boxSize;
     const totalSize = spotSize * gameSize;
     // Offset is used to center the whole block:
@@ -107,16 +107,18 @@ export default class GameOfLife {
 
     this.randomizeBoard();
     this.camera.lookAt(this.scene.position);
+    this.isRunning = true;
 
     window.addEventListener('resize', () => this.onWindowResize());
     document.addEventListener('keyup', e => {
       if (e.code === 'Space') {
-        this.step();
+        this.isRunning = !this.isRunning;
       }
     });
   }
 
   createMaterial(x, y, z) {
+    const color = new THREE.Vector3(x / this.height, y / this.height, z / this.height);
     const uniforms = {
       state: {
         type: 't',
@@ -129,6 +131,10 @@ export default class GameOfLife {
       gridPosition: {
         type: 'v3',
         value: new THREE.Vector3(x, y, z)
+      },
+      color: {
+        type: 'v3',
+        value: color
       }
     };
 
@@ -173,18 +179,31 @@ export default class GameOfLife {
     this.textures.front.texture.needsUpdate = true;
   }
 
+  /**
+   * Randomizes the game state, saving the result to
+   * the front texture.
+   */
   randomizeBoard() {
     const newState = new Uint8Array(this.width * this.height)
-      .map(() => Math.round(Math.random()));
+      .map(() => {
+        const isOn = Math.random() > 0.8;
+        return Number(isOn);
+      });
+
     this.setState(newState);
   }
 
-
+  /**
+   * Swaps the front and back textures.
+   */
   swapTextures() {
     const { textures } = this;
     [textures.front, textures.back] = [textures.back, textures.front];
   }
 
+  /**
+   * Performs one simulation step, swapping the textures at the end.
+   */
   step() {
     // Ping-pong between the two textures, read from the front - draw to the back:
     this.gameMaterial.uniforms.state.value = this.textures.front.texture;
@@ -204,8 +223,7 @@ export default class GameOfLife {
 
   animate() {
     window.requestAnimationFrame(() => this.animate());
-    if ((Date.now() - this.lastTick) > TICK) {
-      console.log('tick');
+    if (this.isRunning && (Date.now() - this.lastTick) > TICK) {
       this.step();
       this.lastTick = Date.now();
     }
