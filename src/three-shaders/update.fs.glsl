@@ -4,6 +4,10 @@ uniform sampler2D state;
 uniform vec2 stateSize;
 uniform float blue;
 
+/**
+ * Returns the enabled state of the coordinate
+ * at the given direction (x + dx, y + dy, z + dz).
+ */
 int getPointState(int dx, int dy, int dz) {
   vec2 point = gl_FragCoord.xy + vec2(dx, dy);
   // If we have any z-changes, move to the correct slice:
@@ -13,6 +17,9 @@ int getPointState(int dx, int dy, int dz) {
   return int(texel.r);
 }
 
+/**
+ * Returns the enabled state of this fragment's position.
+ */
 int getCurrentPointState() {
   vec4 texel = texture2D(state, gl_FragCoord.xy / stateSize);
   return int(texel.r);
@@ -62,9 +69,8 @@ void main() {
     }
   }
 
-  bool isOn = getCurrentPointState() == 1;
   int color;
-  if (isOn) {
+  if (getCurrentPointState() == 1) {
     color = int(sum >= MIN_LIVE && sum <= MAX_LIVE);
   } else {
     color = int(sum >= MIN_BIRTH && sum <= MAX_BIRTH);
