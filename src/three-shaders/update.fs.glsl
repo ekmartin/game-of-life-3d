@@ -2,6 +2,7 @@ precision mediump float;
 
 uniform sampler2D state;
 uniform vec2 stateSize;
+uniform float blue;
 
 int getPointState(int dx, int dy, int dz) {
   vec2 point = gl_FragCoord.xy + vec2(dx, dy);
@@ -48,7 +49,14 @@ bool isValidX(int dx) {
   return currentSlice == nextSlice;
 }
 
-void main() {
+void main() {/*
+  if (getCurrentPointState() == 1 || getPointState(-1, 0, 0) == 1) {
+    gl_FragColor = vec4(1, 1, 1, 1);
+  } else {
+    gl_FragColor = vec4(0, 0, 0, 1);
+  }
+  return;*/
+
   int sum = 0;
   for (int dx = -1; dx <= 1; dx++) {
     for (int dy = -1; dy <= 1; dy++) {
@@ -61,10 +69,10 @@ void main() {
     }
   }
 
-  int minLive = 4;
-  int maxLive = 5;
-  int minBirth = 5;
-  int maxBirth = 5;
+  int minLive = 2;
+  int maxLive = 3;
+  int minBirth = 3;
+  int maxBirth = 3;
 
   bool isOn = getCurrentPointState() == 1;
   int color;

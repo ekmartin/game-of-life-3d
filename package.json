@@ -21,6 +21,7 @@
     "eslint-config-airbnb-base": "^10.0.1",
     "eslint-plugin-import": "^2.2.0",
     "raw-loader": "^0.5.1",
+    "stats.js": "^0.17.0",
     "webpack": "2.1.0-beta.27",
     "webpack-dev-server": "2.1.0-beta.11"
   },
@@ -33,6 +34,7 @@
     "gl-texture2d": "^2.1.0",
     "ndarray": "^1.0.18",
     "three": "^0.82.1",
+    "three-orbit-controls": "^82.1.0",
     "twgl.js": "^2.1.0"
   }
 }
