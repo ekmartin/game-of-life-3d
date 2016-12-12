@@ -9,6 +9,7 @@
   "scripts": {
     "start": "webpack-dev-server --env.dev",
     "build": "webpack",
+    "deploy": "npm run build && gh-pages -d public -m \"Deploy to GitHub pages\"",
     "test": "npm run lint",
     "lint": "eslint . --ignore-path .gitignore"
   },
@@ -21,6 +22,7 @@
     "eslint": "^3.10.2",
     "eslint-config-airbnb-base": "^10.0.1",
     "eslint-plugin-import": "^2.2.0",
+    "gh-pages": "^0.12.0",
     "raw-loader": "^0.5.1",
     "stats.js": "^0.17.0",
     "webpack": "2.1.0-beta.27",

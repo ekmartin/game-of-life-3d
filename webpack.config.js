@@ -1,12 +1,17 @@
 const { resolve } = require('path');
 const webpack = require('webpack');
 
-module.exports = (options = {}) => ({
-  entry: [
+const getEntry = dev => {
+  const result = dev ? [
     'webpack-dev-server/client?http://localhost:3000',
-    'webpack/hot/only-dev-server',
-    './index.js'
-  ],
+    'webpack/hot/only-dev-server'
+  ] : [];
+
+  return result.concat('./index.js');
+};
+
+module.exports = (options = {}) => ({
+  entry: getEntry(options.dev),
   output: {
     filename: 'bundle.js',
     path: resolve(__dirname, 'public'),
