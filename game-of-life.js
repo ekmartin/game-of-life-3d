@@ -1,9 +1,9 @@
 import * as THREE from 'three';
 import orbitSetup from 'three-orbit-controls';
-import updateFragment from './three-shaders/update.fs.glsl';
-import updateVertex from './three-shaders/update.vs.glsl';
-import drawFragment from './three-shaders/draw.fs.glsl';
-import drawVertex from './three-shaders/draw.vs.glsl';
+import updateFragment from './shaders/update.fs.glsl';
+import updateVertex from './shaders/update.vs.glsl';
+import drawFragment from './shaders/draw.fs.glsl';
+import drawVertex from './shaders/draw.vs.glsl';
 
 const TICK = 900;
 
