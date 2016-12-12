@@ -1,7 +1,7 @@
 const { resolve } = require('path');
 const webpack = require('webpack');
 
-module.exports = () => ({
+module.exports = (options = {}) => ({
   entry: [
     'webpack-dev-server/client?http://localhost:3000',
     'webpack/hot/only-dev-server',
@@ -13,7 +13,7 @@ module.exports = () => ({
     publicPath: '/'
   },
   context: resolve(__dirname, 'src'),
-  devtool: 'inline-source-map',
+  devtool: options.dev ? 'inline-source-map' : 'cheap-module-source-map',
   devServer: {
     hot: true,
     port: 3000,
@@ -33,8 +33,12 @@ module.exports = () => ({
       }
     ]
   },
-  plugins: [
-    new webpack.HotModuleReplacementPlugin(),
-    new webpack.NamedModulesPlugin()
-  ]
+  plugins: options.dev ?
+    [
+      new webpack.HotModuleReplacementPlugin(),
+      new webpack.NamedModulesPlugin()
+    ] :
+    [
+      new webpack.optimize.UglifyJsPlugin()
+    ]
 });
