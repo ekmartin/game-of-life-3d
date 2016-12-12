@@ -2,9 +2,56 @@
 <html>
   <head>
     <meta charset="UTF-8">
-    <title>6.837 Project</title>
+    <title>Game of Life 3D</title>
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      canvas {
+        display: block;
+      }
+
+      .info {
+        position: absolute;
+        top: 10%;
+        left: 10%;
+        z-index: 999;
+        font-family: monospace;
+        color: white;
+      }
+
+      h1 {
+        font-weight: 100;
+        margin-bottom: 0;
+      }
+
+      p {
+        color: rgba(255, 255, 255, 0.8);
+        white-space: pre-line;
+        font-size: 14px;
+        line-height: 1.4;
+        margin-top: 0;
+      }
+
+      a {
+        color: #5ce6cd;
+        text-decoration: none;
+      }
+    </style>
   </head>
   <body>
+    <div class="info">
+      <h1>
+        game of life 3d
+      </h1>
+      <p>
+        move your mouse around
+        pause with space
+        source: <a href="https://github.com/ekmartin/game-of-life-3d">github</a>
+      </p>
+    </div>
     <script src="bundle.js"></script>
   </body>
 </html>
