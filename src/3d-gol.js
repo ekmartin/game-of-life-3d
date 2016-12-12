@@ -48,6 +48,12 @@ export default class GameOfLife {
     this.gameMaterial = new THREE.ShaderMaterial({
       fragmentShader: updateFragment,
       vertexShader: updateVertex,
+      defines: {
+        MIN_LIVE: 4,
+        MAX_LIVE: 5,
+        MIN_BIRTH: 2,
+        MAX_BIRTH: 6
+      },
       uniforms: {
         state: {
           type: 't',

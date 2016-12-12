@@ -49,14 +49,7 @@ bool isValidX(int dx) {
   return currentSlice == nextSlice;
 }
 
-void main() {/*
-  if (getCurrentPointState() == 1 || getPointState(-1, 0, 0) == 1) {
-    gl_FragColor = vec4(1, 1, 1, 1);
-  } else {
-    gl_FragColor = vec4(0, 0, 0, 1);
-  }
-  return;*/
-
+void main() {
   int sum = 0;
   for (int dx = -1; dx <= 1; dx++) {
     for (int dy = -1; dy <= 1; dy++) {
@@ -69,17 +62,12 @@ void main() {/*
     }
   }
 
-  int minLive = 2;
-  int maxLive = 3;
-  int minBirth = 3;
-  int maxBirth = 3;
-
   bool isOn = getCurrentPointState() == 1;
   int color;
   if (isOn) {
-    color = int(sum >= minLive && sum <= maxLive);
+    color = int(sum >= MIN_LIVE && sum <= MAX_LIVE);
   } else {
-    color = int(sum >= minBirth && sum <= maxBirth);
+    color = int(sum >= MIN_BIRTH && sum <= MAX_BIRTH);
   }
 
   gl_FragColor = vec4(color, color, color, 1);
