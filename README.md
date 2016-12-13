@@ -1,5 +1,5 @@
 # game-of-life-3d
-> 3D implementation of Conway's Game of Life, where the simulation happens on your GPU.
+> 3D implementation of Conway's Game of Life, where the game simulation happens on your [GPU](/shaders/update.fs.glsl).
 
 ## Installation
 
