@@ -8,13 +8,15 @@ import drawVertex from './shaders/draw.vs.glsl';
 const TICK = 900;
 
 export default class GameOfLife {
-  constructor() {
+  constructor(winWidth, winHeight, renderOptions) {
+    this.winWidth = winWidth;
+    this.winHeight = winHeight;
     this.scene = new THREE.Scene();
     this.offScene = new THREE.Scene();
     this.lastTick = 0;
 
     const fov = 60;
-    const aspect = window.innerWidth / window.innerHeight;
+    const aspect = winWidth / winHeight;
     const near = 1;
     const far = 5000;
     this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
@@ -27,8 +29,8 @@ export default class GameOfLife {
     this.controls.minDistance = 400;
     this.controls.maxDistance = 4000;
 
-    const gameSize = 15;
-    const boxSize = 40;
+    const gameSize = 16;
+    const boxSize = 50;
     const gridSize = gameSize * boxSize;
     this.height = gameSize;
     this.width = gameSize * gameSize;
@@ -91,20 +93,65 @@ export default class GameOfLife {
     const gameMesh = new THREE.Mesh(quad, this.gameMaterial);
     this.offScene.add(gameMesh);
 
-    this.renderer = new THREE.WebGLRenderer({ antialias: true });
-    this.renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(this.renderer.domElement);
+    this.renderer = new THREE.WebGLRenderer(Object.assign({
+      antialias: true
+    }, renderOptions));
 
-    this.randomizeBoard();
+    const state = this.randomizeBoard();
+    this.setState(state);
+
     this.camera.lookAt(this.scene.position);
     this.isRunning = true;
+  }
 
+  setup() {
+    this.renderer.setSize(this.winWidth, this.winHeight);
+    document.body.appendChild(this.renderer.domElement);
     window.addEventListener('resize', () => this.onWindowResize());
     document.addEventListener('keyup', e => {
       if (e.code === 'Space') {
         this.isRunning = !this.isRunning;
+      } else if (e.key === 's') {
+        this.step();
       }
     });
+  }
+
+  /**
+   * Updates the Game of Life parameters.
+   */
+  setGameParameters(minLive, maxLive, minBirth, maxBirth) {
+    this.gameMaterial.defines = {
+      MIN_LIVE: minLive,
+      MAX_LIVE: maxLive,
+      MIN_BIRTH: minBirth,
+      MAX_BIRTH: maxBirth
+    };
+
+    this.gameMaterial.needsUpdate = true;
+    // We could keep going here, but it
+    // makes more sense to restart.
+    const state = this.randomizeBoard();
+    this.setState(state);
+  }
+
+  createCube() {
+    const newState = new Uint8Array(this.width * this.height);
+    const center = this.height / 2;
+    const isCenter = n => [center, center - 1].includes(n);
+    // Assume we have an even grid, and put a 2x2x2 cube in the middle.
+    for (let x = 0; x < this.height; x++) {
+      for (let y = 0; y < this.height; y++) {
+        for (let z = 0; z < this.height; z++) {
+          if (isCenter(x) && isCenter(y) && isCenter(z)) {
+            const index = x + (this.width * y) + (this.height * z);
+            newState[index] = 1;
+          }
+        }
+      }
+    }
+
+    return newState;
   }
 
   /**
@@ -172,20 +219,19 @@ export default class GameOfLife {
     );
 
     this.textures.front.texture.needsUpdate = true;
+    this.bindRenderTexture();
   }
 
   /**
-   * Randomizes the game state, saving the result to
-   * the front texture.
+   * Randomizes the game state,
+   * returning a bit array that can be passed to setState().
    */
   randomizeBoard() {
-    const newState = new Uint8Array(this.width * this.height)
+    return new Uint8Array(this.width * this.height)
       .map(() => {
         const isOn = Math.random() > 0.8;
         return Number(isOn);
       });
-
-    this.setState(newState);
   }
 
   /**
@@ -197,22 +243,25 @@ export default class GameOfLife {
   }
 
   /**
+   * Pass the front texture to the rendered game cubes.
+   */
+  bindRenderTexture() {
+    this.cubes.forEach(({ material }) => {
+      material.uniforms.state.value = this.textures.front.texture;
+    });
+  }
+
+  /**
    * Performs one simulation step, swapping the textures at the end.
    */
   step() {
     // Ping-pong between the two textures, read from the front - draw to the back:
     this.gameMaterial.uniforms.state.value = this.textures.front.texture;
     this.renderer.render(this.offScene, this.offCamera, this.textures.back, true);
-
-    // To make sure we render the initial state,
-    // we always read from the front texture here:
-    this.cubes.forEach(({ material }) => {
-      material.uniforms.state.value = this.textures.front.texture;
-    });
-
     // Then swap them so we can do the opposite
     // the next time (so our simulation moves forward):
     this.swapTextures();
+    this.bindRenderTexture();
   }
 
   animate() {
@@ -223,6 +272,29 @@ export default class GameOfLife {
     }
 
     this.renderer.render(this.scene, this.camera);
+  }
+
+  /**
+   * Returns a bit representation of the state texture,
+   * on the same format that can be passed to setState().
+   */
+  readState() {
+    const buffer = new Uint8Array(this.width * this.height * 4);
+    this.renderer.readRenderTargetPixels(
+      // If we call this after a step(),
+      // the textuers have been swapped.
+      // To be able to read the initial state
+      // as well we read from the back here:
+      this.textures.front,
+      0, 0,
+      this.width, this.height,
+      buffer
+    );
+
+    // The texture contains 4 values for each cell,
+    // we only care about the red (the first):
+    return new Uint8Array(this.width * this.height)
+      .map((_value, index) => Number(!!buffer[index * 4]));
   }
 
   onWindowResize() {
