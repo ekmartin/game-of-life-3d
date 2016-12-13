@@ -223,15 +223,24 @@ export default class GameOfLife {
   }
 
   /**
+   * Returns the x, y, z coordinate of
+   * a given index in the game texture.
+   */
+  getCoordinates(index) {
+    const x = index % this.height;
+    const y = Math.floor(index / this.width);
+    const z = Math.floor((index % this.width) / this.height);
+    return { x, y, z };
+  }
+
+  /**
    * Randomizes the game state,
    * returning a bit array that can be passed to setState().
    */
   randomizeBoard() {
+    const limit = 0.7;
     return new Uint8Array(this.width * this.height)
-      .map(() => {
-        const isOn = Math.random() > 0.8;
-        return Number(isOn);
-      });
+      .map(() => Number(Math.random() > limit));
   }
 
   /**
