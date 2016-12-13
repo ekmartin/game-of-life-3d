@@ -5,14 +5,15 @@ import updateVertex from './shaders/update.vs.glsl';
 import drawFragment from './shaders/draw.fs.glsl';
 import drawVertex from './shaders/draw.vs.glsl';
 
-const TICK = 900;
-
 export default class GameOfLife {
   constructor(winWidth, winHeight, renderOptions) {
     this.winWidth = winWidth;
     this.winHeight = winHeight;
     this.scene = new THREE.Scene();
     this.offScene = new THREE.Scene();
+
+    // Milliseconds between each game tick:
+    this.tick = 400;
     this.lastTick = 0;
 
     const fov = 60;
@@ -29,8 +30,8 @@ export default class GameOfLife {
     this.controls.minDistance = 400;
     this.controls.maxDistance = 4000;
 
-    const gameSize = 16;
-    const boxSize = 50;
+    const gameSize = 20;
+    const boxSize = 40;
     const gridSize = gameSize * boxSize;
     this.height = gameSize;
     this.width = gameSize * gameSize;
@@ -44,20 +45,18 @@ export default class GameOfLife {
     );
     this.offCamera.position.z = 100;
 
-    this.textures = {
-      front: this.createRenderTarget(),
-      back: this.createRenderTarget()
+    this.textures = this.createTextures();
+    const defines = {
+      MIN_LIVE: 5,
+      MAX_LIVE: 7,
+      MIN_BIRTH: 6,
+      MAX_BIRTH: 6
     };
 
     this.gameMaterial = new THREE.ShaderMaterial({
       fragmentShader: updateFragment,
       vertexShader: updateVertex,
-      defines: {
-        MIN_LIVE: 4,
-        MAX_LIVE: 5,
-        MIN_BIRTH: 2,
-        MAX_BIRTH: 6
-      },
+      defines,
       uniforms: {
         state: {
           type: 't',
@@ -70,6 +69,7 @@ export default class GameOfLife {
       }
     });
 
+    // Create a grid of cubes, gameSize * gameSize:
     const geometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
     // Offset is used to center the whole block:
     const offset = (gridSize - boxSize) / 2;
@@ -104,6 +104,9 @@ export default class GameOfLife {
     this.isRunning = true;
   }
 
+  /**
+   * Attaches listeners and adds the canvas to the DOM.
+   */
   setup() {
     this.renderer.setSize(this.winWidth, this.winHeight);
     document.body.appendChild(this.renderer.domElement);
@@ -132,9 +135,14 @@ export default class GameOfLife {
     // We could keep going here, but it
     // makes more sense to restart.
     const state = this.randomizeBoard();
+    this.textures = this.createTextures();
     this.setState(state);
   }
 
+  /**
+   * Creates a 2x2 cube at the center,
+   * an alternative to randomizeBoard().
+   */
   createCube() {
     const newState = new Uint8Array(this.width * this.height);
     const center = this.height / 2;
@@ -186,11 +194,21 @@ export default class GameOfLife {
     });
   }
 
-  createRenderTarget() {
-    return new THREE.WebGLRenderTarget(this.width, this.height, {
+  /**
+   * Creates two textures, front and back,
+   * which we later ping-pong between
+   * to simulate life.
+   */
+  createTextures() {
+    const texture = () => new THREE.WebGLRenderTarget(this.width, this.height, {
       minFilter: THREE.NearestFilter,
       magFilter: THREE.NearestFilter
     });
+
+    return {
+      front: texture(),
+      back: texture()
+    };
   }
 
   /**
@@ -200,8 +218,9 @@ export default class GameOfLife {
    */
   setState(state) {
     const data = new Uint8Array(this.width * this.height * 4);
-    state.forEach((value, index) => {
-      const rgbaIndex = index * 4;
+    for (let i = 0; i < state.length; i++) {
+      const value = state[i];
+      const rgbaIndex = i * 4;
       // If value is "on", set all rgb to on as well:
       const rgbValue = value ? 255 : 0;
       for (let offset = 0; offset < 3; offset++) {
@@ -209,7 +228,7 @@ export default class GameOfLife {
       }
 
       data[rgbaIndex + 3] = 255;
-    });
+    }
 
     this.textures.front.texture = new THREE.DataTexture(
       data,
@@ -238,7 +257,7 @@ export default class GameOfLife {
    * returning a bit array that can be passed to setState().
    */
   randomizeBoard() {
-    const limit = 0.7;
+    const limit = 0.65;
     return new Uint8Array(this.width * this.height)
       .map(() => Number(Math.random() > limit));
   }
@@ -275,7 +294,7 @@ export default class GameOfLife {
 
   animate() {
     window.requestAnimationFrame(() => this.animate());
-    if (this.isRunning && (Date.now() - this.lastTick) > TICK) {
+    if (this.isRunning && (Date.now() - this.lastTick) > this.tick) {
       this.step();
       this.lastTick = Date.now();
     }
