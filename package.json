@@ -1,5 +1,5 @@
 {
-  "name": "project",
+  "name": "game-of-life-3d",
   "version": "0.1.0",
   "main": "index.js",
   "repository": {
