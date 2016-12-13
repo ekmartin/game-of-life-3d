@@ -1,5 +1,3 @@
-precision mediump float;
-
 uniform sampler2D state;
 uniform vec2 stateSize;
 uniform float blue;
