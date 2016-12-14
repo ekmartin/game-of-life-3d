@@ -4,6 +4,8 @@ uniform vec3 gridPosition;
 uniform vec3 color;
 
 void main() {
+  // This calculation could have been done
+  // upon initialization in JS as well:
   vec2 coord = gridPosition.xy;
   coord.x += gridPosition.z * stateSize.y;
   vec4 texel = texture2D(state, coord / stateSize);
